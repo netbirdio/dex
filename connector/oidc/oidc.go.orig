@@ -102,9 +102,6 @@ type Config struct {
 	// If not setted it will be auto-detected the best-fit for the connector.
 	PKCEChallenge string `json:"pkceChallenge"`
 
-	// PKCEChallenge specifies which PKCE algorithm will be used
-	PKCEChallenge string `json:"pkceChallenge"`
-
 	// OverrideClaimMapping will be used to override the options defined in claimMappings.
 	// i.e. if there are 'email' and `preferred_email` claims available, by default Dex will always use the `email` claim independent of the ClaimMapping.EmailKey.
 	// This setting allows you to override the default behavior of Dex and enforce the mappings defined in `claimMapping`.
@@ -399,7 +396,6 @@ func (c *Config) Open(id string, logger *slog.Logger) (conn connector.Connector,
 		groupsPrefix:              c.ClaimMutations.ModifyGroupNames.Prefix,
 		groupsSuffix:              c.ClaimMutations.ModifyGroupNames.Suffix,
 		pkceChallenge:             c.PKCEChallenge,
-		pkceChallenge:             c.PKCEChallenge,
 		endSessionURL:             endSessionURL,
 	}, nil
 }
@@ -436,19 +432,7 @@ type oidcConnector struct {
 	groupsPrefix              string
 	groupsSuffix              string
 	pkceChallenge             string
-	pkceChallenge             string
 	endSessionURL             string
-}
-
-func getAuthCodeOptionForCodeChallenge(codeVerifier, codeChallengeMethod string) (oauth2.AuthCodeOption, error) {
-	switch codeChallengeMethod {
-	case "plain":
-		return oauth2.VerifierOption(codeVerifier), nil
-	case "S256":
-		return oauth2.S256ChallengeOption(codeVerifier), nil
-	default:
-		return nil, fmt.Errorf("unknown challenge method (%v)", codeChallengeMethod)
-	}
 }
 
 func (c *oidcConnector) Close() error {
@@ -471,16 +455,6 @@ func (c *oidcConnector) LoginURL(s connector.Scopes, callbackURL, state string) 
 
 	if s.OfflineAccess {
 		opts = append(opts, oauth2.AccessTypeOffline, oauth2.SetAuthURLParam("prompt", c.promptType))
-	}
-
-	if c.pkceChallenge != "" {
-		codeVerifier := oauth2.GenerateVerifier()
-		authCodeOption, err := getAuthCodeOptionForCodeChallenge(codeVerifier, c.pkceChallenge)
-		if err != nil {
-			return "", fmt.Errorf("oidc: failed to get PKCE AuthCodeOption for CodeChallenge: %v", err)
-		}
-		opts = append(opts, authCodeOption)
-		state = state + ":pkce:" + codeVerifier
 	}
 
 	if c.pkceChallenge != "" {

@@ -668,13 +668,6 @@ func (s *Server) handleConnectorCallback(w http.ResponseWriter, r *http.Request)
 			s.renderError(r, w, http.StatusBadRequest, "User session error.")
 			return
 		}
-		// HACK for PKCE support: split state if it contains pkce verifier
-		if parts := strings.Split(authID, ":pkce:"); len(parts) == 2 {
-			authID = parts[0]
-			q := r.URL.Query()
-			q.Set("pkce_verifier", parts[1])
-			r.URL.RawQuery = q.Encode()
-		}
 	case http.MethodPost: // SAML POST binding
 		if authID = r.PostFormValue("RelayState"); authID == "" {
 			s.renderError(r, w, http.StatusBadRequest, "User session error.")

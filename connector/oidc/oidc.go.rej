@@ -1,0 +1,68 @@
+--- connector/oidc/oidc.go
++++ connector/oidc/oidc.go
+@@ -319,6 +322,7 @@ func (c *Config) Open(id string, logger *slog.Logger) (conn connector.Connector,
+ 		groupsFilter:              groupsFilter,
+ 		groupsPrefix:              c.ClaimMutations.ModifyGroupNames.Prefix,
+ 		groupsSuffix:              c.ClaimMutations.ModifyGroupNames.Suffix,
++		pkceChallenge:             c.PKCEChallenge,
+ 	}, nil
+ }
+ 
+@@ -351,6 +355,7 @@ type oidcConnector struct {
+ 	groupsFilter              *regexp.Regexp
+ 	groupsPrefix              string
+ 	groupsSuffix              string
++	pkceChallenge             string
+ }
+ 
+ func (c *oidcConnector) Close() error {
+@@ -358,6 +363,17 @@ func (c *oidcConnector) Close() error {
+ 	return nil
+ }
+ 
++func getAuthCodeOptionForCodeChallenge(codeVerifier, codeChallengeMethod string) (oauth2.AuthCodeOption, error) {
++	switch codeChallengeMethod {
++	case "plain":
++		return oauth2.VerifierOption(codeVerifier), nil
++	case "S256":
++		return oauth2.S256ChallengeOption(codeVerifier), nil
++	default:
++		return nil, fmt.Errorf("unknown challenge method (%v)", codeChallengeMethod)
++	}
++}
++
+ func (c *oidcConnector) LoginURL(s connector.Scopes, callbackURL, state string) (string, error) {
+ 	if c.redirectURI != callbackURL {
+ 		return "", fmt.Errorf("expected callback URL %q did not match the URL in the config %q", callbackURL, c.redirectURI)
+@@ -373,6 +389,17 @@ func (c *oidcConnector) LoginURL(s connector.Scopes, callbackURL, state string)
+ 	if s.OfflineAccess {
+ 		opts = append(opts, oauth2.AccessTypeOffline, oauth2.SetAuthURLParam("prompt", c.promptType))
+ 	}
++
++	if c.pkceChallenge != "" {
++		codeVerifier := oauth2.GenerateVerifier()
++		authCodeOption, err := getAuthCodeOptionForCodeChallenge(codeVerifier, c.pkceChallenge)
++		if err != nil {
++			return "", fmt.Errorf("oidc: failed to get PKCE AuthCodeOption for CodeChallenge: %v", err)
++		}
++		opts = append(opts, authCodeOption)
++		state = state + ":pkce:" + codeVerifier
++	}
++
+ 	return c.oauth2Config.AuthCodeURL(state, opts...), nil
+ }
+ 
+@@ -404,7 +431,12 @@ func (c *oidcConnector) HandleCallback(s connector.Scopes, r *http.Request) (ide
+ 
+ 	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, c.httpClient)
+ 
+-	token, err := c.oauth2Config.Exchange(ctx, q.Get("code"))
++	var opts []oauth2.AuthCodeOption
++	if verifier := q.Get("pkce_verifier"); verifier != "" {
++		opts = append(opts, oauth2.VerifierOption(verifier))
++	}
++
++	token, err := c.oauth2Config.Exchange(ctx, q.Get("code"), opts...)
+ 	if err != nil {
+ 		return identity, fmt.Errorf("oidc: failed to get token: %v", err)
+ 	}
