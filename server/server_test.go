@@ -1707,6 +1707,27 @@ func TestOAuth2DeviceFlow(t *testing.T) {
 				if resp.StatusCode != http.StatusOK {
 					t.Errorf("%v - Unexpected Response Type.  Expected 200 got  %v.  Response: %v", tc.name, resp.StatusCode, string(responseBody))
 				}
+				if resp.Request.URL.Path != s.absPath("/approval") {
+					t.Fatalf("%v - Expected device approval page, got %v", tc.name, resp.Request.URL)
+				}
+				if !strings.Contains(string(responseBody), deviceCode.UserCode) {
+					t.Fatalf("%v - Device approval page does not show user code %q", tc.name, deviceCode.UserCode)
+				}
+
+				approvalData := url.Values{}
+				approvalData.Set("approval", "approve")
+				resp, err = http.PostForm(resp.Request.URL.String(), approvalData)
+				if err != nil {
+					t.Fatalf("Could not approve device request: %v", err)
+				}
+				defer resp.Body.Close()
+				responseBody, err = io.ReadAll(resp.Body)
+				if err != nil {
+					t.Fatalf("Could not read device approval response: %v", err)
+				}
+				if resp.StatusCode != http.StatusOK {
+					t.Fatalf("%v - Device approval failed with %v: %v", tc.name, resp.StatusCode, string(responseBody))
+				}
 
 				// Hit the Token Endpoint, and try and get an access token
 				tokenURL, _ := url.Parse(issuer.String())

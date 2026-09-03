@@ -197,6 +197,7 @@ const (
 const (
 	deviceTokenPending  = "authorization_pending"
 	deviceTokenComplete = "complete"
+	deviceTokenDenied   = "access_denied"
 	deviceTokenSlowDown = "slow_down"
 	deviceTokenExpired  = "expired_token"
 )
@@ -665,7 +666,7 @@ func (s *Server) parseAuthorizationRequest(r *http.Request) (*storage.AuthReques
 		idTokenHintSubject = idToken.Subject
 	}
 
-	return &storage.AuthRequest{
+	authReq := &storage.AuthRequest{
 		ID:                  storage.NewID(),
 		ClientID:            client.ID,
 		State:               state,
@@ -682,7 +683,23 @@ func (s *Server) parseAuthorizationRequest(r *http.Request) (*storage.AuthReques
 			CodeChallengeMethod: codeChallengeMethod,
 		},
 		HMACKey: storage.NewHMACKey(crypto.SHA256),
-	}, idTokenHintSubject, nil
+	}
+
+	deviceReq, err := s.deviceRequestForAuthRequest(ctx, *authReq)
+	if err != nil {
+		if !errors.Is(err, storage.ErrNotFound) && !errors.Is(err, errInvalidDeviceAuthorization) {
+			s.logger.ErrorContext(ctx, "failed to validate device authorization request", "err", err)
+			return nil, "", newDisplayedErr(http.StatusInternalServerError, "Database error.")
+		}
+		return nil, "", newDisplayedErr(http.StatusBadRequest, "Invalid or expired device authorization request.")
+	}
+	if deviceReq != nil {
+		// RFC 8628 Sections 3.3 and 3.3.1 require an approval decision even when
+		// the verification URI carries the user code.
+		authReq.ForceApprovalPrompt = true
+	}
+
+	return authReq, idTokenHintSubject, nil
 }
 
 func parseCrossClientScope(scope string) (peerID string, ok bool) {

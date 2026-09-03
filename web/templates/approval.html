@@ -1,7 +1,14 @@
 {{ template "header.html" . }}
 
 <div class="theme-panel">
+  {{ if .DeviceUserCode }}
+  <h2 class="theme-heading">Authorize Device</h2>
+  <div class="dex-subtle-text">Confirm this code matches the code shown on the device you are signing in:</div>
+  <div class="dex-device-code">{{ .DeviceUserCode }}</div>
+  <div class="dex-subtle-text">Only continue if you started this sign-in on a device in your possession.</div>
+  {{ else }}
   <h2 class="theme-heading">Grant Access</h2>
+  {{ end }}
 
   <hr class="dex-separator">
   <div>
@@ -24,7 +31,11 @@
         <input type="hidden" name="req" value="{{ .AuthReqID }}"/>
         <input type="hidden" name="approval" value="approve">
         <button type="submit" class="dex-btn theme-btn--success">
+            {{ if .DeviceUserCode }}
+            <span class="dex-btn-text">Authorize Device</span>
+            {{ else }}
             <span class="dex-btn-text">Grant Access</span>
+            {{ end }}
         </button>
       </form>
     </div>
@@ -33,7 +44,11 @@
         <input type="hidden" name="req" value="{{ .AuthReqID }}"/>
         <input type="hidden" name="approval" value="rejected">
         <button type="submit" class="dex-btn theme-btn-provider">
+            {{ if .DeviceUserCode }}
+            <span class="dex-btn-text">Deny</span>
+            {{ else }}
             <span class="dex-btn-text">Cancel</span>
+            {{ end }}
         </button>
       </form>
     </div>

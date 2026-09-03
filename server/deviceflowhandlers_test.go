@@ -293,7 +293,7 @@ func TestDeviceCallback(t *testing.T) {
 				Scopes:     []string{"openid", "profile", "email"},
 				Expiry:     now().Add(5 * time.Minute),
 			},
-			expectedResponseCode: http.StatusUnauthorized,
+			expectedResponseCode: http.StatusBadRequest,
 		},
 		{
 			testName:     "Bad Device Request Secret",
@@ -302,6 +302,7 @@ func TestDeviceCallback(t *testing.T) {
 			testDeviceRequest: storage.DeviceRequest{
 				UserCode:     "XXXX-XXXX",
 				DeviceCode:   "devicecode",
+				ClientID:     "testclient",
 				ClientSecret: "foobar",
 				Scopes:       []string{"openid", "profile", "email"},
 				Expiry:       now().Add(5 * time.Minute),
