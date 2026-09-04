@@ -134,6 +134,14 @@ body {
   font-size: 13px;
 }
 
+.dex-device-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  margin: 16px auto;
+}
+
 .dex-separator {
   color: #aaa;
 }
