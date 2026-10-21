@@ -10,7 +10,6 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/beevik/etree v1.6.0
 	github.com/coreos/go-oidc/v3 v3.18.0
-	github.com/netbirdio/dex/api/v2 v2.0.0-20261021115841-9f3e6d4c2ce3
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-jose/go-jose/v4 v4.1.4
@@ -26,6 +25,7 @@ require (
 	github.com/lib/pq v1.12.3
 	github.com/mattermost/xml-roundtrip-validator v0.1.0
 	github.com/mattn/go-sqlite3 v1.14.42
+	github.com/netbirdio/dex/api/v2 v2.0.0-20261021115841-9f3e6d4c2ce3
 	github.com/oklog/run v1.2.0
 	github.com/openbao/openbao/api/v2 v2.5.1
 	github.com/pkg/errors v0.9.1

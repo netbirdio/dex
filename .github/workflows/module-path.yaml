@@ -31,4 +31,6 @@ jobs:
           status=0
           grep -rIn --include='*.go' --include='*.proto' --exclude-dir=.git -e "\"${OLD_PATH}" . && status=1
           grep -rIn --include='go.mod' --exclude-dir=.git -e "${OLD_PATH}" . && status=1
+          # The Makefile builds the module path from ORG_PATH and PROJ.
+          grep -nE '^ORG_PATH[[:space:]]*=[[:space:]]*github\.com/dexidp' Makefile && status=1
           [ "${status}" -eq 0 ] || { echo "found ${OLD_PATH}: rewrite it to ${NEW_PATH}"; exit 1; }
