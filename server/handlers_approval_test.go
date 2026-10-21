@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dexidp/dex/storage"
+	"github.com/netbirdio/dex/storage"
 )
 
 type getAuthRequestErrorStorage struct {

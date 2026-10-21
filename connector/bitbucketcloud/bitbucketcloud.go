@@ -15,8 +15,8 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
 
-	"github.com/dexidp/dex/connector"
-	"github.com/dexidp/dex/pkg/groups"
+	"github.com/netbirdio/dex/connector"
+	"github.com/netbirdio/dex/pkg/groups"
 )
 
 const (

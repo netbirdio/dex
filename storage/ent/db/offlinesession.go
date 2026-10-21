@@ -8,7 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/dexidp/dex/storage/ent/db/offlinesession"
+	"github.com/netbirdio/dex/storage/ent/db/offlinesession"
 )
 
 // OfflineSession is the model entity for the OfflineSession schema.

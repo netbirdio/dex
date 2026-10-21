@@ -23,10 +23,10 @@ import (
 	"github.com/go-jose/go-jose/v4"
 	"github.com/google/uuid"
 
-	"github.com/dexidp/dex/connector"
-	"github.com/dexidp/dex/server/internal"
-	"github.com/dexidp/dex/server/signer"
-	"github.com/dexidp/dex/storage"
+	"github.com/netbirdio/dex/connector"
+	"github.com/netbirdio/dex/server/internal"
+	"github.com/netbirdio/dex/server/signer"
+	"github.com/netbirdio/dex/storage"
 )
 
 // TODO(ericchiang): clean this file up and figure out more idiomatic error handling.

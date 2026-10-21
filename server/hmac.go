@@ -7,7 +7,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/dexidp/dex/server/internal"
+	"github.com/netbirdio/dex/server/internal"
 )
 
 // computeHMAC computes a SHA-256 HMAC over a protobuf-encoded payload

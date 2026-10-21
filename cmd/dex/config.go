@@ -14,15 +14,15 @@ import (
 	"github.com/go-jose/go-jose/v4"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/dexidp/dex/pkg/featureflags"
-	"github.com/dexidp/dex/server"
-	"github.com/dexidp/dex/server/signer"
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/ent"
-	"github.com/dexidp/dex/storage/etcd"
-	"github.com/dexidp/dex/storage/kubernetes"
-	"github.com/dexidp/dex/storage/memory"
-	"github.com/dexidp/dex/storage/sql"
+	"github.com/netbirdio/dex/pkg/featureflags"
+	"github.com/netbirdio/dex/server"
+	"github.com/netbirdio/dex/server/signer"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/ent"
+	"github.com/netbirdio/dex/storage/etcd"
+	"github.com/netbirdio/dex/storage/kubernetes"
+	"github.com/netbirdio/dex/storage/memory"
+	"github.com/netbirdio/dex/storage/sql"
 )
 
 func configUnmarshaller(b []byte, v interface{}) error {

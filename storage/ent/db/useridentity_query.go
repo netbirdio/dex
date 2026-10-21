@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/dexidp/dex/storage/ent/db/predicate"
-	"github.com/dexidp/dex/storage/ent/db/useridentity"
+	"github.com/netbirdio/dex/storage/ent/db/predicate"
+	"github.com/netbirdio/dex/storage/ent/db/useridentity"
 )
 
 // UserIdentityQuery is the builder for querying UserIdentity entities.

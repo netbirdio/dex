@@ -35,11 +35,11 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/dexidp/dex/api/v2"
-	"github.com/dexidp/dex/pkg/featureflags"
-	"github.com/dexidp/dex/server"
-	"github.com/dexidp/dex/server/signer"
-	"github.com/dexidp/dex/storage"
+	"github.com/netbirdio/dex/api/v2"
+	"github.com/netbirdio/dex/pkg/featureflags"
+	"github.com/netbirdio/dex/server"
+	"github.com/netbirdio/dex/server/signer"
+	"github.com/netbirdio/dex/storage"
 )
 
 type serveOptions struct {

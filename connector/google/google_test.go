@@ -16,7 +16,7 @@ import (
 	admin "google.golang.org/api/admin/directory/v1"
 	"google.golang.org/api/option"
 
-	"github.com/dexidp/dex/connector"
+	"github.com/netbirdio/dex/connector"
 )
 
 var (

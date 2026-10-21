@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/memory"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/memory"
 )
 
 func newTestLocalSigner(t *testing.T, config LocalConfig, s storage.Storage, now func() time.Time) *localSigner {

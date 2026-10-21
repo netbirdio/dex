@@ -3,8 +3,8 @@ package client
 import (
 	"context"
 
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/ent/db/devicerequest"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/ent/db/devicerequest"
 )
 
 // CreateDeviceRequest saves provided device request into the database.

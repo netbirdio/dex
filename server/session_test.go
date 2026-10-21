@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/memory"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/memory"
 )
 
 func newTestSessionServer(t *testing.T) *Server {

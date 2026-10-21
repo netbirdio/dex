@@ -6,14 +6,14 @@ import (
 	"hash"
 	"time"
 
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/ent/db"
-	"github.com/dexidp/dex/storage/ent/db/authcode"
-	"github.com/dexidp/dex/storage/ent/db/authrequest"
-	"github.com/dexidp/dex/storage/ent/db/authsession"
-	"github.com/dexidp/dex/storage/ent/db/devicerequest"
-	"github.com/dexidp/dex/storage/ent/db/devicetoken"
-	"github.com/dexidp/dex/storage/ent/db/migrate"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/ent/db"
+	"github.com/netbirdio/dex/storage/ent/db/authcode"
+	"github.com/netbirdio/dex/storage/ent/db/authrequest"
+	"github.com/netbirdio/dex/storage/ent/db/authsession"
+	"github.com/netbirdio/dex/storage/ent/db/devicerequest"
+	"github.com/netbirdio/dex/storage/ent/db/devicetoken"
+	"github.com/netbirdio/dex/storage/ent/db/migrate"
 )
 
 var _ storage.Storage = (*Database)(nil)

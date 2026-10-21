@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/dexidp/dex/connector"
-	dexcel "github.com/dexidp/dex/pkg/cel"
+	"github.com/netbirdio/dex/connector"
+	dexcel "github.com/netbirdio/dex/pkg/cel"
 )
 
 func TestCompileBool(t *testing.T) {

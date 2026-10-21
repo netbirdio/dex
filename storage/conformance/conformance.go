@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/dexidp/dex/storage"
+	"github.com/netbirdio/dex/storage"
 )
 
 const keyRoundTripPayload = "storage-keys-round-trip"

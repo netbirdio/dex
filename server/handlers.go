@@ -21,10 +21,10 @@ import (
 	"github.com/go-jose/go-jose/v4"
 	"github.com/gorilla/mux"
 
-	"github.com/dexidp/dex/connector"
-	"github.com/dexidp/dex/pkg/featureflags"
-	"github.com/dexidp/dex/server/internal"
-	"github.com/dexidp/dex/storage"
+	"github.com/netbirdio/dex/connector"
+	"github.com/netbirdio/dex/pkg/featureflags"
+	"github.com/netbirdio/dex/server/internal"
+	"github.com/netbirdio/dex/storage"
 )
 
 const (

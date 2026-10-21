@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dexidp/dex/connector"
-	"github.com/dexidp/dex/server/internal"
-	"github.com/dexidp/dex/storage"
+	"github.com/netbirdio/dex/connector"
+	"github.com/netbirdio/dex/server/internal"
+	"github.com/netbirdio/dex/storage"
 )
 
 type RefreshTokenPolicy struct {

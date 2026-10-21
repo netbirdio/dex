@@ -16,7 +16,7 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
 
-	"github.com/dexidp/dex/examples/example-app/session"
+	"github.com/netbirdio/dex/examples/example-app/session"
 )
 
 // handleTokenRefresh redeems a refresh token for a new token set.

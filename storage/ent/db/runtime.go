@@ -5,19 +5,19 @@ package db
 import (
 	"time"
 
-	"github.com/dexidp/dex/storage/ent/db/authcode"
-	"github.com/dexidp/dex/storage/ent/db/authrequest"
-	"github.com/dexidp/dex/storage/ent/db/authsession"
-	"github.com/dexidp/dex/storage/ent/db/connector"
-	"github.com/dexidp/dex/storage/ent/db/devicerequest"
-	"github.com/dexidp/dex/storage/ent/db/devicetoken"
-	"github.com/dexidp/dex/storage/ent/db/keys"
-	"github.com/dexidp/dex/storage/ent/db/oauth2client"
-	"github.com/dexidp/dex/storage/ent/db/offlinesession"
-	"github.com/dexidp/dex/storage/ent/db/password"
-	"github.com/dexidp/dex/storage/ent/db/refreshtoken"
-	"github.com/dexidp/dex/storage/ent/db/useridentity"
-	"github.com/dexidp/dex/storage/ent/schema"
+	"github.com/netbirdio/dex/storage/ent/db/authcode"
+	"github.com/netbirdio/dex/storage/ent/db/authrequest"
+	"github.com/netbirdio/dex/storage/ent/db/authsession"
+	"github.com/netbirdio/dex/storage/ent/db/connector"
+	"github.com/netbirdio/dex/storage/ent/db/devicerequest"
+	"github.com/netbirdio/dex/storage/ent/db/devicetoken"
+	"github.com/netbirdio/dex/storage/ent/db/keys"
+	"github.com/netbirdio/dex/storage/ent/db/oauth2client"
+	"github.com/netbirdio/dex/storage/ent/db/offlinesession"
+	"github.com/netbirdio/dex/storage/ent/db/password"
+	"github.com/netbirdio/dex/storage/ent/db/refreshtoken"
+	"github.com/netbirdio/dex/storage/ent/db/useridentity"
+	"github.com/netbirdio/dex/storage/ent/schema"
 )
 
 // The init function reads all schema descriptors with runtime code

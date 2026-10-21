@@ -11,12 +11,12 @@ import (
 	"github.com/go-jose/go-jose/v4"
 	"github.com/kylelemons/godebug/pretty"
 
-	"github.com/dexidp/dex/connector/mock"
-	"github.com/dexidp/dex/connector/oidc"
-	"github.com/dexidp/dex/server"
-	"github.com/dexidp/dex/server/signer"
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/sql"
+	"github.com/netbirdio/dex/connector/mock"
+	"github.com/netbirdio/dex/connector/oidc"
+	"github.com/netbirdio/dex/server"
+	"github.com/netbirdio/dex/server/signer"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/sql"
 )
 
 var _ = yaml.YAMLToJSON
