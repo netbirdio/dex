@@ -13,8 +13,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dexidp/dex/server/internal"
-	"github.com/dexidp/dex/storage"
+	"github.com/netbirdio/dex/server/internal"
+	"github.com/netbirdio/dex/storage"
 )
 
 // rememberMeDefault returns a pointer to the default remember-me value if sessions are enabled, nil otherwise.

@@ -1,10 +1,10 @@
-module github.com/dexidp/dex/examples
+module github.com/netbirdio/dex/examples
 
 go 1.25.0
 
 require (
 	github.com/coreos/go-oidc/v3 v3.18.0
-	github.com/dexidp/dex/api/v2 v2.4.0
+	github.com/netbirdio/dex/api/v2 v2.4.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/oauth2 v0.36.0
 	google.golang.org/grpc v1.80.0
@@ -20,3 +20,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260120221211-b8f7ae30c516 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
+
+replace github.com/netbirdio/dex/api/v2 => ../api/v2

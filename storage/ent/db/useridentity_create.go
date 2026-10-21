@@ -10,7 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/dexidp/dex/storage/ent/db/useridentity"
+	"github.com/netbirdio/dex/storage/ent/db/useridentity"
 )
 
 // UserIdentityCreate is the builder for creating a UserIdentity entity.

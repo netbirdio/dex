@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	dexcel "github.com/dexidp/dex/pkg/cel"
+	dexcel "github.com/netbirdio/dex/pkg/cel"
 )
 
 func TestGroupMatches(t *testing.T) {

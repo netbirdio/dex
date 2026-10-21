@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-jose/go-jose/v4"
 
-	"github.com/dexidp/dex/storage"
+	"github.com/netbirdio/dex/storage"
 )
 
 // LocalConfig holds configuration for the local signer.

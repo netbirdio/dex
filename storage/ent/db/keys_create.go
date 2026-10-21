@@ -10,9 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/ent/db/keys"
 	jose "github.com/go-jose/go-jose/v4"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/ent/db/keys"
 )
 
 // KeysCreate is the builder for creating a Keys entity.

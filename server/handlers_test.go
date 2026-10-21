@@ -22,10 +22,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
 
-	"github.com/dexidp/dex/connector"
-	"github.com/dexidp/dex/server/internal"
-	"github.com/dexidp/dex/server/signer"
-	"github.com/dexidp/dex/storage"
+	"github.com/netbirdio/dex/connector"
+	"github.com/netbirdio/dex/server/internal"
+	"github.com/netbirdio/dex/server/signer"
+	"github.com/netbirdio/dex/storage"
 )
 
 func boolPtr(v bool) *bool {

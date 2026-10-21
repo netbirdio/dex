@@ -4,8 +4,8 @@ import (
 	"log/slog"
 	"testing"
 
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/conformance"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/conformance"
 )
 
 func newSQLiteStorage(t *testing.T) storage.Storage {

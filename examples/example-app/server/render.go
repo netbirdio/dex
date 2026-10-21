@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dexidp/dex/examples/example-app/session"
+	"github.com/netbirdio/dex/examples/example-app/session"
 )
 
 //go:embed templates/*.html

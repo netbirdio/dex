@@ -3,7 +3,7 @@ syntax = "proto3";
 package api;
 
 option java_package = "com.coreos.dex.api";
-option go_package = "github.com/dexidp/dex/api/v2;api";
+option go_package = "github.com/netbirdio/dex/api/v2;api";
 
 // Client represents an OAuth2 client.
 message Client {

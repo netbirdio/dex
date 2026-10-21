@@ -16,9 +16,9 @@ import (
 	entSQL "entgo.io/ent/dialect/sql"
 	"github.com/go-sql-driver/mysql" // Register mysql driver.
 
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/ent/client"
-	"github.com/dexidp/dex/storage/ent/db"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/ent/client"
+	"github.com/netbirdio/dex/storage/ent/db"
 )
 
 const (

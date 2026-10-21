@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"slices"
 
-	"github.com/dexidp/dex/connector"
-	"github.com/dexidp/dex/server/internal"
-	"github.com/dexidp/dex/storage"
+	"github.com/netbirdio/dex/connector"
+	"github.com/netbirdio/dex/server/internal"
+	"github.com/netbirdio/dex/storage"
 )
 
 // handleLogout implements OIDC RP-Initiated Logout (https://openid.net/specs/openid-connect-rpinitiated-1_0.html).

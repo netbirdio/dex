@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/dexidp/dex/examples/example-app/server"
+	"github.com/netbirdio/dex/examples/example-app/server"
 )
 
 func cmd() *cobra.Command {

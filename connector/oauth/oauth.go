@@ -12,8 +12,8 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/dexidp/dex/connector"
-	"github.com/dexidp/dex/pkg/httpclient"
+	"github.com/netbirdio/dex/connector"
+	"github.com/netbirdio/dex/pkg/httpclient"
 )
 
 var _ connector.CallbackConnector = (*oauthConnector)(nil)

@@ -29,11 +29,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
 
-	"github.com/dexidp/dex/connector"
-	"github.com/dexidp/dex/connector/mock"
-	"github.com/dexidp/dex/server/signer"
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/memory"
+	"github.com/netbirdio/dex/connector"
+	"github.com/netbirdio/dex/connector/mock"
+	"github.com/netbirdio/dex/server/signer"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/memory"
 )
 
 func mustLoad(s string) *rsa.PrivateKey {

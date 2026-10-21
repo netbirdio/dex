@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dexidp/dex/storage/kubernetes/k8sapi"
+	"github.com/netbirdio/dex/storage/kubernetes/k8sapi"
 )
 
 // transport is a simple http.Transport wrapper

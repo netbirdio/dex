@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/ent/db"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/ent/db"
 )
 
 func getKeys(ctx context.Context, client *db.KeysClient) (storage.Keys, error) {

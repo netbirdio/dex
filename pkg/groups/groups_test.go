@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/dexidp/dex/pkg/groups"
+	"github.com/netbirdio/dex/pkg/groups"
 )
 
 func TestFilter(t *testing.T) {

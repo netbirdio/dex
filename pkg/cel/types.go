@@ -3,7 +3,7 @@ package cel
 import (
 	"github.com/google/cel-go/cel"
 
-	"github.com/dexidp/dex/connector"
+	"github.com/netbirdio/dex/connector"
 )
 
 // VariableDeclaration declares a named variable and its CEL type

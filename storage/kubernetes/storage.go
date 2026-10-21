@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dexidp/dex/storage"
-	"github.com/dexidp/dex/storage/kubernetes/k8sapi"
+	"github.com/netbirdio/dex/storage"
+	"github.com/netbirdio/dex/storage/kubernetes/k8sapi"
 )
 
 const (
