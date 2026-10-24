@@ -293,7 +293,7 @@ func TestDeviceCallback(t *testing.T) {
 				Scopes:     []string{"openid", "profile", "email"},
 				Expiry:     now().Add(5 * time.Minute),
 			},
-			expectedResponseCode: http.StatusUnauthorized,
+			expectedResponseCode: http.StatusBadRequest,
 		},
 		{
 			testName:     "Bad Device Request Secret",
@@ -302,6 +302,7 @@ func TestDeviceCallback(t *testing.T) {
 			testDeviceRequest: storage.DeviceRequest{
 				UserCode:     "XXXX-XXXX",
 				DeviceCode:   "devicecode",
+				ClientID:     "testclient",
 				ClientSecret: "foobar",
 				Scopes:       []string{"openid", "profile", "email"},
 				Expiry:       now().Add(5 * time.Minute),
@@ -331,6 +332,21 @@ func TestDeviceCallback(t *testing.T) {
 			testDeviceToken: storage.DeviceToken{
 				DeviceCode:          "devicecode",
 				Status:              deviceTokenComplete,
+				Token:               "",
+				Expiry:              now().Add(5 * time.Minute),
+				LastRequestTime:     time.Time{},
+				PollIntervalSeconds: 0,
+			},
+			expectedResponseCode: http.StatusBadRequest,
+		},
+		{
+			testName:          "Device Authorization Denied",
+			values:            baseFormValues,
+			testAuthCode:      baseAuthCode,
+			testDeviceRequest: baseDeviceRequest,
+			testDeviceToken: storage.DeviceToken{
+				DeviceCode:          "devicecode",
+				Status:              deviceTokenDenied,
 				Token:               "",
 				Expiry:              now().Add(5 * time.Minute),
 				LastRequestTime:     time.Time{},
@@ -859,4 +875,193 @@ func TestVerifyCodeResponse(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDeviceApprovalPageRequiresCodeConfirmation(t *testing.T) {
+	s, authReq, deviceReq := setupPendingDeviceApproval(t)
+	approvalURL := absoluteApprovalURL(t, s, authReq)
+
+	resp, err := http.Get(approvalURL)
+	if err != nil {
+		t.Fatalf("Could not load device approval page: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("Could not read device approval page: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("Unexpected device approval status %d: %s", resp.StatusCode, body)
+	}
+	for _, expected := range []string{
+		"Authorize Device",
+		deviceReq.UserCode,
+		"matches the code shown on the device",
+		"Only continue if you started this sign-in",
+		"Deny",
+	} {
+		if !strings.Contains(string(body), expected) {
+			t.Errorf("Device approval page does not contain %q", expected)
+		}
+	}
+}
+
+func TestDirectDeviceAuthorizationRequiresApproval(t *testing.T) {
+	s, deviceReq := setupPendingDeviceFlow(t)
+	params := url.Values{
+		"client_id":     {deviceReq.ClientID},
+		"redirect_uri":  {s.absPath(deviceCallbackURI)},
+		"response_type": {responseTypeCode},
+		"scope":         {strings.Join(deviceReq.Scopes, " ")},
+		"state":         {deviceReq.UserCode},
+	}
+
+	resp, err := http.Get(s.absURL("/auth") + "?" + params.Encode())
+	if err != nil {
+		t.Fatalf("Could not start direct device authorization: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("Could not read direct device authorization response: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("Unexpected direct device authorization status %d: %s", resp.StatusCode, body)
+	}
+	if resp.Request.URL.Path != s.absPath("/approval") {
+		t.Fatalf("Expected direct device authorization to stop at approval, got %v", resp.Request.URL)
+	}
+	if !strings.Contains(string(body), deviceReq.UserCode) {
+		t.Fatalf("Device approval page does not show user code %q", deviceReq.UserCode)
+	}
+
+	storedToken, err := s.storage.GetDeviceToken(t.Context(), deviceReq.DeviceCode)
+	if err != nil {
+		t.Fatalf("Could not read pending device token: %v", err)
+	}
+	if storedToken.Status != deviceTokenPending {
+		t.Fatalf("Expected device token to remain pending before approval, got %q", storedToken.Status)
+	}
+}
+
+func TestDeviceApprovalDenialStopsPolling(t *testing.T) {
+	s, authReq, deviceReq := setupPendingDeviceApproval(t)
+
+	approvalURL := absoluteApprovalURL(t, s, authReq)
+	resp, err := http.PostForm(approvalURL, url.Values{"approval": {"rejected"}})
+	if err != nil {
+		t.Fatalf("Could not deny device approval: %v", err)
+	}
+	resp.Body.Close()
+
+	storedToken, err := s.storage.GetDeviceToken(t.Context(), deviceReq.DeviceCode)
+	if err != nil {
+		t.Fatalf("Could not read denied device token: %v", err)
+	}
+	if storedToken.Status != deviceTokenDenied {
+		t.Fatalf("Expected denied device token status %q, got %q", deviceTokenDenied, storedToken.Status)
+	}
+	if _, err := s.storage.GetAuthRequest(t.Context(), authReq.ID); err != storage.ErrNotFound {
+		t.Fatalf("Expected denied authorization request to be consumed, got %v", err)
+	}
+
+	tokenURL := s.absURL("/token")
+	resp, err = http.PostForm(tokenURL, url.Values{
+		"grant_type":  {grantTypeDeviceCode},
+		"device_code": {deviceReq.DeviceCode},
+		"client_id":   {deviceReq.ClientID},
+	})
+	if err != nil {
+		t.Fatalf("Could not poll denied device request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	var tokenErr ErrorResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tokenErr); err != nil {
+		t.Fatalf("Could not decode denied token response: %v", err)
+	}
+	if resp.StatusCode != http.StatusBadRequest || tokenErr.Error != errAccessDenied {
+		t.Fatalf("Expected access_denied response, got status %d and error %q", resp.StatusCode, tokenErr.Error)
+	}
+}
+
+func absoluteApprovalURL(t *testing.T, s *Server, authReq storage.AuthRequest) string {
+	t.Helper()
+
+	approvalPath, err := url.Parse(s.buildApprovalURL(authReq))
+	if err != nil {
+		t.Fatalf("Could not parse approval path: %v", err)
+	}
+	return s.issuerURL.ResolveReference(approvalPath).String()
+}
+
+func setupPendingDeviceApproval(t *testing.T) (*Server, storage.AuthRequest, storage.DeviceRequest) {
+	t.Helper()
+	s, deviceReq := setupPendingDeviceFlow(t)
+	now := s.now()
+
+	authReq := storage.AuthRequest{
+		ID:                  "device-auth-request",
+		ClientID:            deviceReq.ClientID,
+		ResponseTypes:       []string{responseTypeCode},
+		Scopes:              deviceReq.Scopes,
+		RedirectURI:         s.absPath(deviceCallbackURI),
+		State:               deviceReq.UserCode,
+		ForceApprovalPrompt: true,
+		LoggedIn:            true,
+		Claims:              storage.Claims{Username: "device-user"},
+		Expiry:              now.Add(5 * time.Minute),
+		HMACKey:             []byte("device-approval-hmac-key"),
+		MFAValidated:        true,
+	}
+
+	if err := s.storage.CreateAuthRequest(t.Context(), authReq); err != nil {
+		t.Fatalf("Could not create authorization request: %v", err)
+	}
+
+	return s, authReq, deviceReq
+}
+
+func setupPendingDeviceFlow(t *testing.T) (*Server, storage.DeviceRequest) {
+	t.Helper()
+
+	now := time.Now()
+	httpServer, s := newTestServer(t, func(c *Config) {
+		c.Issuer += "/non-root-path"
+		c.Now = func() time.Time { return now }
+	})
+	t.Cleanup(httpServer.Close)
+
+	const clientID = "device-client"
+	deviceReq := storage.DeviceRequest{
+		UserCode:   "ABCD-WXYZ",
+		DeviceCode: "device-code",
+		ClientID:   clientID,
+		Scopes:     []string{scopeOpenID, scopeProfile},
+		Expiry:     now.Add(5 * time.Minute),
+	}
+
+	ctx := t.Context()
+	if err := s.storage.CreateClient(ctx, storage.Client{
+		ID:           clientID,
+		Name:         "Device Client",
+		Public:       true,
+		RedirectURIs: []string{s.absPath(deviceCallbackURI)},
+	}); err != nil {
+		t.Fatalf("Could not create device client: %v", err)
+	}
+	if err := s.storage.CreateDeviceRequest(ctx, deviceReq); err != nil {
+		t.Fatalf("Could not create device request: %v", err)
+	}
+	if err := s.storage.CreateDeviceToken(ctx, storage.DeviceToken{
+		DeviceCode: deviceReq.DeviceCode,
+		Status:     deviceTokenPending,
+		Expiry:     deviceReq.Expiry,
+	}); err != nil {
+		t.Fatalf("Could not create device token: %v", err)
+	}
+
+	return s, deviceReq
 }

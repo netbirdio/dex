@@ -962,6 +962,17 @@ func (s *Server) handleApproval(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	deviceReq, err := s.deviceRequestForAuthRequest(ctx, authReq)
+	if err != nil {
+		if !errors.Is(err, storage.ErrNotFound) && !errors.Is(err, errInvalidDeviceAuthorization) {
+			s.logger.ErrorContext(ctx, "failed to validate device authorization request", "err", err)
+			s.renderError(r, w, http.StatusInternalServerError, "Database error.")
+			return
+		}
+		s.renderError(r, w, http.StatusBadRequest, "Invalid or expired device authorization request.")
+		return
+	}
+
 	switch r.Method {
 	case http.MethodGet:
 		// Skip the approval page and issue the code directly if:
@@ -988,11 +999,29 @@ func (s *Server) handleApproval(w http.ResponseWriter, r *http.Request) {
 			s.renderError(r, w, http.StatusInternalServerError, "Failed to retrieve client.")
 			return
 		}
-		if err := s.templates.approval(r, w, authReq.ID, authReq.Claims.Username, client.Name, authReq.Scopes); err != nil {
+		deviceUserCode := ""
+		if deviceReq != nil {
+			deviceUserCode = deviceReq.UserCode
+		}
+		if err := s.templates.approval(r, w, authReq.ID, authReq.Claims.Username, client.Name, authReq.Scopes, deviceUserCode); err != nil {
 			s.logger.ErrorContext(r.Context(), "server template error", "err", err)
 		}
 	case http.MethodPost:
 		if r.FormValue("approval") != "approve" {
+			if deviceReq != nil {
+				if err := s.denyDeviceRequest(ctx, deviceReq.DeviceCode); err != nil {
+					s.logger.ErrorContext(ctx, "failed to deny device authorization request", "err", err)
+					s.renderError(r, w, http.StatusInternalServerError, "Database error.")
+					return
+				}
+				if err := s.storage.DeleteAuthRequest(ctx, authReq.ID); err != nil {
+					s.logger.ErrorContext(ctx, "failed to delete denied authorization request", "err", err)
+					s.renderError(r, w, http.StatusInternalServerError, "Database error.")
+					return
+				}
+				s.renderError(r, w, http.StatusBadRequest, "Device authorization was denied.")
+				return
+			}
 			s.renderError(r, w, http.StatusInternalServerError, "Approval rejected.")
 			return
 		}

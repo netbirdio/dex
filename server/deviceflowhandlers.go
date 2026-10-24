@@ -1,12 +1,14 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"path"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -29,8 +31,54 @@ type deviceCodeResponse struct {
 	PollInterval int `json:"interval"`
 }
 
+var errInvalidDeviceAuthorization = errors.New("invalid or expired device authorization request")
+
 func (s *Server) getDeviceVerificationURI() string {
 	return path.Join(s.issuerURL.Path, "/device/auth/verify_code")
+}
+
+func (s *Server) isDeviceCallbackRedirect(redirectURI string) bool {
+	return redirectURI == deviceCallbackURI ||
+		redirectURI == s.absPath(deviceCallbackURI) ||
+		redirectURI == s.absURL(deviceCallbackURI)
+}
+
+func (s *Server) deviceRequestForAuthRequest(ctx context.Context, authReq storage.AuthRequest) (*storage.DeviceRequest, error) {
+	if !s.isDeviceCallbackRedirect(authReq.RedirectURI) {
+		return nil, nil
+	}
+	if len(authReq.ResponseTypes) != 1 || authReq.ResponseTypes[0] != responseTypeCode {
+		return nil, errInvalidDeviceAuthorization
+	}
+
+	deviceReq, err := s.storage.GetDeviceRequest(ctx, authReq.State)
+	if err != nil {
+		return nil, fmt.Errorf("get device request: %w", err)
+	}
+	if s.now().After(deviceReq.Expiry) || deviceReq.ClientID != authReq.ClientID ||
+		!slices.Equal(deviceReq.Scopes, authReq.Scopes) {
+		return nil, errInvalidDeviceAuthorization
+	}
+
+	deviceToken, err := s.storage.GetDeviceToken(ctx, deviceReq.DeviceCode)
+	if err != nil {
+		return nil, fmt.Errorf("get device token: %w", err)
+	}
+	if s.now().After(deviceToken.Expiry) || deviceToken.Status != deviceTokenPending {
+		return nil, errInvalidDeviceAuthorization
+	}
+
+	return &deviceReq, nil
+}
+
+func (s *Server) denyDeviceRequest(ctx context.Context, deviceCode string) error {
+	return s.storage.UpdateDeviceToken(ctx, deviceCode, func(old storage.DeviceToken) (storage.DeviceToken, error) {
+		if old.Status != deviceTokenPending {
+			return old, errInvalidDeviceAuthorization
+		}
+		old.Status = deviceTokenDenied
+		return old, nil
+	})
 }
 
 func (s *Server) handleDeviceExchange(w http.ResponseWriter, r *http.Request) {
@@ -281,6 +329,8 @@ func (s *Server) handleDeviceToken(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		w.Write([]byte(deviceToken.Token))
+	case deviceTokenDenied:
+		s.tokenErrHelper(w, errAccessDenied, "", http.StatusBadRequest)
 	}
 }
 
@@ -328,6 +378,12 @@ func (s *Server) handleDeviceCallback(w http.ResponseWriter, r *http.Request) {
 			s.renderError(r, w, errCode, "Invalid or expired user code.")
 			return
 		}
+		if authCode.ClientID != deviceReq.ClientID ||
+			!slices.Equal(authCode.Scopes, deviceReq.Scopes) ||
+			!s.isDeviceCallbackRedirect(authCode.RedirectURI) {
+			s.renderError(r, w, http.StatusBadRequest, "Authorization code does not match the device request.")
+			return
+		}
 
 		client, err := s.storage.GetClient(ctx, deviceReq.ClientID)
 		if err != nil {
@@ -364,8 +420,8 @@ func (s *Server) handleDeviceCallback(w http.ResponseWriter, r *http.Request) {
 		}
 
 		updater := func(old storage.DeviceToken) (storage.DeviceToken, error) {
-			if old.Status == deviceTokenComplete {
-				return old, errors.New("device token already complete")
+			if old.Status != deviceTokenPending {
+				return old, errors.New("device token is no longer pending")
 			}
 			respStr, err := json.MarshalIndent(resp, "", "  ")
 			if err != nil {

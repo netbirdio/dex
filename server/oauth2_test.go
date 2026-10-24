@@ -471,6 +471,59 @@ func TestParseAuthorizationRequest(t *testing.T) {
 	}
 }
 
+func TestParseAuthorizationRequestForcesDeviceApproval(t *testing.T) {
+	httpServer, server := newTestServer(t, func(c *Config) {
+		c.Issuer += "/non-root-path"
+	})
+	defer httpServer.Close()
+	require.True(t, server.skipApproval, "Test must reproduce a deployment that skips normal approval")
+
+	ctx := t.Context()
+	const (
+		clientID = "device-client"
+		userCode = "ABCD-WXYZ"
+	)
+	redirectURIs := []string{
+		deviceCallbackURI,
+		server.absPath(deviceCallbackURI),
+		server.absURL(deviceCallbackURI),
+	}
+	require.NoError(t, server.storage.CreateClient(ctx, storage.Client{
+		ID:           clientID,
+		Public:       true,
+		RedirectURIs: redirectURIs,
+	}))
+	require.NoError(t, server.storage.CreateDeviceRequest(ctx, storage.DeviceRequest{
+		UserCode:   userCode,
+		DeviceCode: "device-code",
+		ClientID:   clientID,
+		Scopes:     []string{scopeOpenID},
+		Expiry:     server.now().Add(5 * time.Minute),
+	}))
+	require.NoError(t, server.storage.CreateDeviceToken(ctx, storage.DeviceToken{
+		DeviceCode: "device-code",
+		Status:     deviceTokenPending,
+		Expiry:     server.now().Add(5 * time.Minute),
+	}))
+
+	for _, redirectURI := range redirectURIs {
+		t.Run(redirectURI, func(t *testing.T) {
+			params := url.Values{
+				"client_id":     {clientID},
+				"redirect_uri":  {redirectURI},
+				"response_type": {responseTypeCode},
+				"scope":         {scopeOpenID},
+				"state":         {userCode},
+			}
+			req := httptest.NewRequest(http.MethodGet, httpServer.URL+"/auth?"+params.Encode(), nil)
+
+			authReq, _, err := server.parseAuthorizationRequest(req)
+			require.NoError(t, err)
+			assert.True(t, authReq.ForceApprovalPrompt, "Device authorization must require explicit approval")
+		})
+	}
+}
+
 const (
 	// at_hash value and access_token returned by Google.
 	googleAccessTokenHash = "piwt8oCH-K2D9pXlaS1Y-w"
